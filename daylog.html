@@ -1,0 +1,1649 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#f5f0e8">
+<title>DayLog</title>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Mono:wght@300;400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #f5f0e8;
+  --bg2:      #ede8dd;
+  --bg3:      #e4ddd0;
+  --surface:  #faf8f3;
+  --border:   #d6cfc0;
+  --border2:  #c5bca8;
+  --accent:   #b5651d;
+  --accent2:  #8b4513;
+  --accent-l: rgba(181,101,29,0.12);
+  --green:    #4a7c59;
+  --green-l:  rgba(74,124,89,0.12);
+  --red:      #9b3a3a;
+  --red-l:    rgba(155,58,58,0.1);
+  --blue:     #3a6b8a;
+  --blue-l:   rgba(58,107,138,0.12);
+  --purple:   #6a4a8a;
+  --purple-l: rgba(106,74,138,0.12);
+  --text:     #2c2416;
+  --text2:    #6b5d4a;
+  --text3:    #a09076;
+  --shadow:   0 2px 12px rgba(44,36,22,0.08);
+  --shadow2:  0 4px 24px rgba(44,36,22,0.12);
+  --mono:     'DM Mono', monospace;
+  --sans:     'Noto Sans TC', sans-serif;
+  --serif:    'Lora', serif;
+  --r:        8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 16px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  box-shadow: var(--shadow);
+  z-index: 50;
+}
+.logo {
+  font-family: var(--serif);
+  font-size: 22px;
+  color: var(--accent);
+  letter-spacing: 1px;
+}
+.header-center {
+  text-align: center;
+}
+.header-date {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  letter-spacing: 0.5px;
+}
+.header-nav {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.nav-arrow {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text2);
+  width: 30px; height: 30px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.nav-arrow:hover { background: var(--bg2); border-color: var(--border2); }
+.today-btn {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-family: var(--mono);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.today-btn:hover { background: var(--accent2); }
+.clock {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 1px;
+  min-width: 48px;
+  text-align: right;
+}
+
+/* ── TAB BAR ── */
+.tab-bar {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.tab {
+  flex: 1;
+  padding: 10px 4px 8px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--text3);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  font-family: var(--mono);
+  letter-spacing: 0.5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+.tab .tab-icon { font-size: 18px; }
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab:hover:not(.active) { color: var(--text2); background: var(--bg2); }
+
+/* ── PAGES ── */
+.pages { flex: 1; overflow: hidden; position: relative; }
+.page { position: absolute; inset: 0; overflow-y: auto; display: none; }
+.page.active { display: block; }
+.page::-webkit-scrollbar { width: 3px; }
+.page::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ── SHARED COMPONENTS ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 6px;
+  background: var(--surface);
+  border: 1.5px solid var(--border2);
+  color: var(--text);
+  padding: 10px 18px;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: var(--r);
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn:hover { background: var(--bg2); border-color: var(--accent); color: var(--accent); }
+.btn:active { transform: scale(0.97); }
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+  font-size: 15px;
+  padding: 12px 20px;
+}
+.btn-primary:hover { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.btn-sm { padding: 7px 14px; font-size: 13px; }
+.btn-icon { width: 40px; height: 40px; padding: 0; border-radius: 50%; font-size: 18px; }
+
+input, select, textarea {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  padding: 10px 12px;
+  border-radius: var(--r);
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  -webkit-appearance: none;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-l);
+}
+select option { background: var(--surface); }
+textarea { resize: vertical; line-height: 1.6; }
+
+.section-title {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 10px;
+}
+
+/* ═══════════════════════════════════
+   PAGE 1 — TODO
+═══════════════════════════════════ */
+#todoPage { padding: 0 0 80px; }
+
+.todo-top-bar {
+  padding: 14px 16px 10px;
+  background: var(--surface);
+  position: sticky; top: 0; z-index: 10;
+  border-bottom: 1px solid var(--border);
+}
+.todo-date-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  margin-bottom: 10px;
+  scrollbar-width: none;
+}
+.todo-date-tabs::-webkit-scrollbar { display: none; }
+.date-chip {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text2);
+  cursor: pointer;
+  background: var(--surface);
+  transition: all 0.15s;
+}
+.date-chip.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.date-chip:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+.todo-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.filter-pill {
+  padding: 5px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  font-size: 12px;
+  color: var(--text3);
+  cursor: pointer;
+  background: none;
+  font-family: var(--mono);
+  transition: all 0.12s;
+}
+.filter-pill.active { border-color: var(--accent); color: var(--accent); background: var(--accent-l); }
+
+.todo-list-wrap { padding: 12px 16px; }
+.todo-item {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 14px;
+  margin-bottom: 8px;
+  transition: all 0.15s;
+  position: relative;
+  cursor: pointer;
+}
+.todo-item:hover { box-shadow: var(--shadow); border-color: var(--border2); }
+.todo-item.done { opacity: 0.5; }
+.todo-item.dragging { opacity: 0.3; transform: scale(0.98); }
+.todo-item.drag-over { border-color: var(--accent); background: var(--accent-l); }
+
+.todo-row1 { display: flex; align-items: flex-start; gap: 10px; }
+.check-box {
+  width: 22px; height: 22px; flex-shrink: 0;
+  border: 2px solid var(--border2);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  margin-top: 1px;
+  transition: all 0.15s;
+  cursor: pointer;
+  background: none;
+}
+.check-box:hover { border-color: var(--green); }
+.check-box.checked { background: var(--green); border-color: var(--green); }
+.check-box.checked::after { content: '✓'; color: #fff; font-size: 12px; font-weight: 700; }
+.todo-title { flex: 1; font-size: 15px; line-height: 1.4; font-weight: 500; }
+.todo-item.done .todo-title { text-decoration: line-through; color: var(--text3); }
+
+.priority-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px;
+}
+.p-high .priority-dot { background: var(--red); }
+.p-mid  .priority-dot { background: var(--accent); }
+.p-low  .priority-dot { background: var(--blue); }
+
+.todo-row2 { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; margin-top: 7px; margin-left: 32px; }
+.todo-time { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+.tag-chip {
+  font-size: 11px; padding: 2px 7px;
+  border-radius: 10px; background: var(--bg2);
+  color: var(--text2); border: 1px solid var(--border);
+}
+.tag-chip::before { content: '#'; }
+.todo-date-badge {
+  font-size: 10px; padding: 2px 6px;
+  border-radius: 10px;
+  font-family: var(--mono);
+  color: var(--text3);
+  background: var(--bg3);
+}
+.todo-note { font-size: 12px; color: var(--text2); margin-top: 7px; margin-left: 32px; line-height: 1.5; font-family: var(--serif); font-style: italic; }
+
+.todo-swipe-actions {
+  display: none;
+  gap: 6px;
+  position: absolute; right: 12px; top: 12px;
+}
+.todo-item:hover .todo-swipe-actions { display: flex; }
+.act-btn {
+  background: var(--bg2); border: 1.5px solid var(--border);
+  color: var(--text2); width: 32px; height: 32px;
+  border-radius: 6px; font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+}
+.act-btn:hover { background: var(--bg3); }
+.act-btn.del:hover { background: var(--red-l); border-color: var(--red); color: var(--red); }
+
+/* Add Todo FAB */
+.fab {
+  position: fixed;
+  bottom: 80px; right: 20px;
+  width: 58px; height: 58px;
+  background: var(--accent);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(181,101,29,0.35);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+  z-index: 100;
+}
+.fab:hover { background: var(--accent2); transform: scale(1.05); box-shadow: 0 6px 28px rgba(181,101,29,0.4); }
+.fab:active { transform: scale(0.95); }
+
+/* ═══════════════════════════════════
+   PAGE 2 — TIMELINE
+═══════════════════════════════════ */
+#timelinePage { padding-bottom: 80px; }
+
+.timeline-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20;
+  padding: 10px 16px;
+}
+.timeline-cols {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 0;
+}
+.col-label {
+  flex: 1; text-align: center;
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 1px; color: var(--text3);
+  text-transform: uppercase; padding: 4px 0;
+}
+.col-label.plan-label { color: var(--blue); }
+.col-label.actual-label { color: var(--green); }
+.hour-col-space { width: 44px; flex-shrink: 0; }
+
+.timeline-body {
+  padding: 0 12px;
+}
+.hour-row {
+  display: flex;
+  min-height: 60px;
+  position: relative;
+}
+.hour-row::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 44px; right: 0;
+  height: 1px;
+  background: var(--border);
+}
+.hour-label {
+  width: 44px; flex-shrink: 0;
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text3); padding-top: 4px;
+  letter-spacing: 0.5px;
+}
+.hour-label.current { color: var(--accent); font-weight: 500; }
+.timeline-col {
+  flex: 1; position: relative;
+  min-height: 60px; padding: 2px 3px 2px 3px;
+  border-left: 1px solid var(--border);
+  cursor: crosshair;
+  user-select: none;
+}
+.timeline-col.plan-col { background: rgba(58,107,138,0.02); }
+.timeline-col.actual-col { background: rgba(74,124,89,0.02); }
+.timeline-col:hover { background: rgba(181,101,29,0.03); }
+
+/* Drag highlight */
+.drag-preview {
+  position: absolute;
+  left: 2px; right: 2px;
+  background: var(--accent-l);
+  border: 2px dashed var(--accent);
+  border-radius: 4px;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.time-block {
+  position: absolute;
+  left: 2px; right: 2px;
+  border-radius: 6px;
+  padding: 4px 7px;
+  font-size: 11px;
+  line-height: 1.4;
+  cursor: pointer;
+  z-index: 10;
+  overflow: hidden;
+  transition: box-shadow 0.12s, transform 0.12s;
+  border: 1.5px solid transparent;
+}
+.time-block:hover { box-shadow: var(--shadow); }
+.time-block:active { transform: scale(0.98); }
+.time-block.plan-block {
+  background: var(--blue-l);
+  border-color: var(--blue);
+  color: var(--blue);
+}
+.time-block.actual-block {
+  background: var(--green-l);
+  border-color: var(--green);
+  color: var(--green);
+}
+.time-block.cat-work   { background: var(--blue-l);   border-color: var(--blue);   color: var(--blue); }
+.time-block.cat-study  { background: var(--accent-l); border-color: var(--accent); color: var(--accent); }
+.time-block.cat-break  { background: var(--green-l);  border-color: var(--green);  color: var(--green); }
+.time-block.cat-social { background: var(--purple-l); border-color: var(--purple); color: var(--purple); }
+.time-block.cat-phone  { background: var(--red-l);    border-color: var(--red);    color: var(--red); }
+.time-block.cat-other  { background: var(--bg3);      border-color: var(--border2); color: var(--text2); }
+
+.block-title { font-weight: 500; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.block-time  { font-family: var(--mono); font-size: 9px; opacity: 0.7; margin-top: 1px; }
+
+.now-indicator {
+  position: absolute;
+  left: 44px; right: 0;
+  height: 2px;
+  background: var(--accent);
+  z-index: 30;
+  pointer-events: none;
+}
+.now-indicator::before {
+  content: '';
+  position: absolute;
+  left: -4px; top: -4px;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+/* Quick log bar */
+.quick-log-bar {
+  padding: 10px 16px;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  position: sticky; bottom: 70px;
+  z-index: 20;
+  display: flex; gap: 8px; align-items: center;
+  box-shadow: 0 -2px 12px rgba(44,36,22,0.06);
+}
+.quick-log-bar input { flex: 1; }
+.quick-log-bar select { width: 90px; flex-shrink: 0; }
+
+/* ═══════════════════════════════════
+   PAGE 3 — SUMMARY
+═══════════════════════════════════ */
+#summaryPage { padding: 16px 16px 80px; }
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 14px 10px;
+  text-align: center;
+}
+.stat-num {
+  font-family: var(--serif);
+  font-size: 26px;
+  color: var(--accent);
+  line-height: 1;
+}
+.stat-label { font-size: 10px; color: var(--text3); margin-top: 4px; font-family: var(--mono); letter-spacing: 0.5px; }
+
+.summary-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.cat-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.cat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.cat-name { font-size: 12px; color: var(--text2); min-width: 36px; }
+.cat-track { flex: 1; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+.cat-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.cat-pct { font-family: var(--mono); font-size: 11px; color: var(--text3); min-width: 32px; text-align: right; }
+
+.pva-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.pva-item:last-child { border-bottom: none; }
+.pva-name { flex: 1; font-size: 13px; }
+.pva-badge {
+  font-size: 11px; padding: 3px 8px; border-radius: 10px;
+  font-family: var(--mono); border: 1.5px solid transparent;
+}
+.pva-done    { background: var(--green-l);  color: var(--green);  border-color: var(--green); }
+.pva-partial { background: var(--accent-l); color: var(--accent); border-color: var(--accent); }
+.pva-miss    { background: var(--red-l);    color: var(--red);    border-color: var(--red); }
+
+.note-area textarea {
+  min-height: 130px;
+  font-family: var(--serif);
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.empty-msg { text-align: center; color: var(--text3); font-size: 13px; padding: 24px 0; font-family: var(--mono); }
+
+/* ═══════════════════════════════════
+   MODALS
+═══════════════════════════════════ */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(44,36,22,0.45);
+  z-index: 200; align-items: flex-end; justify-content: center;
+}
+.overlay.show { display: flex; }
+.sheet {
+  background: var(--surface);
+  border-radius: 20px 20px 0 0;
+  width: 100%; max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 0 0 env(safe-area-inset-bottom,16px);
+  box-shadow: var(--shadow2);
+  animation: slideUp 0.25s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.sheet-handle {
+  width: 36px; height: 4px; background: var(--border2); border-radius: 2px;
+  margin: 12px auto 0;
+}
+.sheet-title {
+  font-family: var(--serif);
+  font-size: 18px;
+  color: var(--accent);
+  padding: 14px 20px 10px;
+  border-bottom: 1px solid var(--border);
+}
+.sheet-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.field-row { display: flex; gap: 8px; }
+.field-row > * { flex: 1; }
+.field-label { font-size: 11px; color: var(--text3); font-family: var(--mono); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; }
+.sheet-actions { display: flex; gap: 8px; padding: 10px 20px 20px; }
+.sheet-actions .btn { flex: 1; }
+
+/* Desktop adjustments */
+@media (min-width: 600px) {
+  .overlay { align-items: center; }
+  .sheet { border-radius: 16px; max-height: 80vh; }
+  .stats-row { grid-template-columns: repeat(4, 1fr); }
+}
+@media (min-width: 900px) {
+  body { flex-direction: row; }
+  .header { display: none; }
+  /* Could add sidebar layout here */
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo">DayLog</div>
+  <div class="header-center">
+    <div class="header-date" id="headerDate">—</div>
+    <div style="display:flex;gap:4px;justify-content:center;margin-top:4px">
+      <button class="nav-arrow" onclick="changeViewDate(-1)">‹</button>
+      <button class="today-btn" onclick="gotoToday()">今天</button>
+      <button class="nav-arrow" onclick="changeViewDate(1)">›</button>
+    </div>
+  </div>
+  <div class="clock" id="clock">00:00</div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <div class="tab active" onclick="switchTab('todo')" id="tab-todo">
+    <span class="tab-icon">☑</span>代辦
+  </div>
+  <div class="tab" onclick="switchTab('timeline')" id="tab-timeline">
+    <span class="tab-icon">📅</span>時間軸
+  </div>
+  <div class="tab" onclick="switchTab('summary')" id="tab-summary">
+    <span class="tab-icon">📊</span>總結
+  </div>
+</div>
+
+<!-- PAGES -->
+<div class="pages">
+
+  <!-- PAGE 1: TODO -->
+  <div class="page active" id="todoPage">
+    <div class="todo-top-bar">
+      <div class="todo-date-tabs" id="dateTabs"></div>
+      <div class="todo-filters">
+        <button class="filter-pill active" onclick="setFilter('all',this)">全部</button>
+        <button class="filter-pill" onclick="setFilter('undone',this)">未完成</button>
+        <button class="filter-pill" onclick="setFilter('high',this)">高優先</button>
+      </div>
+    </div>
+    <div class="todo-list-wrap" id="todoListWrap"></div>
+  </div>
+
+  <!-- PAGE 2: TIMELINE -->
+  <div class="page" id="timelinePage">
+    <div class="timeline-header">
+      <div class="timeline-cols">
+        <div class="hour-col-space"></div>
+        <div class="col-label plan-label">📋 計畫</div>
+        <div class="col-label actual-label">✅ 實際執行</div>
+      </div>
+    </div>
+    <div class="timeline-body" id="timelineBody"></div>
+    <div class="quick-log-bar">
+      <input type="time" id="qTime" style="width:80px;flex:0 0 auto">
+      <select id="qCat" style="width:90px;flex:0 0 auto">
+        <option value="work">工作</option>
+        <option value="study">學習</option>
+        <option value="break">休息</option>
+        <option value="social">社交</option>
+        <option value="phone">手機</option>
+        <option value="other">其他</option>
+      </select>
+      <input type="text" id="qText" placeholder="快速打卡…" onkeydown="if(event.key==='Enter')quickLog()">
+      <button class="btn btn-primary btn-sm" onclick="quickLog()" style="padding:10px 14px;flex-shrink:0">記錄</button>
+    </div>
+  </div>
+
+  <!-- PAGE 3: SUMMARY -->
+  <div class="page" id="summaryPage">
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card"><div class="stat-num" id="st1">0</div><div class="stat-label">代辦</div></div>
+      <div class="stat-card"><div class="stat-num" id="st2">0</div><div class="stat-label">完成</div></div>
+      <div class="stat-card"><div class="stat-num" id="st3">0</div><div class="stat-label">打卡</div></div>
+      <div class="stat-card"><div class="stat-num" id="st4">0h</div><div class="stat-label">記錄</div></div>
+    </div>
+    <div class="summary-card">
+      <div class="section-title">時間分佈</div>
+      <div id="catChart"><div class="empty-msg">尚無紀錄</div></div>
+    </div>
+    <div class="summary-card">
+      <div class="section-title">計畫 vs 實際</div>
+      <div id="pvaChart"><div class="empty-msg">新增代辦後顯示</div></div>
+    </div>
+    <div class="summary-card note-area">
+      <div class="section-title">今日心得</div>
+      <textarea id="dailyNote" placeholder="記下今天的感受、學到的事、明日想做的事…" oninput="saveNote()"></textarea>
+    </div>
+    <div style="padding:4px 0 8px;display:flex;gap:8px">
+      <button class="btn btn-sm" onclick="exportData()" style="flex:1">匯出 JSON</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- FAB -->
+<button class="fab" id="fab" onclick="openAddTodo()">＋</button>
+
+<!-- ADD / EDIT TODO SHEET -->
+<div class="overlay" id="todoSheet" onclick="closeTodoSheet(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="sheetTitle">新增代辦</div>
+    <div class="sheet-body">
+      <div>
+        <div class="field-label">標題 *</div>
+        <input type="text" id="fTitle" placeholder="代辦事項…" onkeydown="if(event.key==='Enter')saveTodo()">
+      </div>
+      <div>
+        <div class="field-label">日期</div>
+        <input type="date" id="fDate">
+      </div>
+      <div class="field-row">
+        <div>
+          <div class="field-label">開始時間</div>
+          <input type="time" id="fStart">
+        </div>
+        <div>
+          <div class="field-label">結束時間</div>
+          <input type="time" id="fEnd">
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <div class="field-label">優先等級</div>
+          <select id="fPriority">
+            <option value="mid">🔶 一般</option>
+            <option value="high">🔴 高</option>
+            <option value="low">🔵 低</option>
+          </select>
+        </div>
+        <div>
+          <div class="field-label">標籤</div>
+          <input type="text" id="fTags" placeholder="工作, 學習…">
+        </div>
+      </div>
+      <div>
+        <div class="field-label">備註</div>
+        <textarea id="fNote" placeholder="備註…" rows="2"></textarea>
+      </div>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn btn-primary" onclick="saveTodo()">儲存</button>
+      <button class="btn" onclick="closeTodoSheet()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- BLOCK DETAIL SHEET -->
+<div class="overlay" id="blockSheet" onclick="closeBlockSheet(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="blockSheetTitle">新增時間區塊</div>
+    <div class="sheet-body">
+      <div>
+        <div class="field-label">事項名稱 *</div>
+        <input type="text" id="bTitle" placeholder="在做什麼…" onkeydown="if(event.key==='Enter')saveBlock()">
+      </div>
+      <div class="field-row">
+        <div>
+          <div class="field-label">開始</div>
+          <input type="time" id="bStart">
+        </div>
+        <div>
+          <div class="field-label">結束</div>
+          <input type="time" id="bEnd">
+        </div>
+      </div>
+      <div>
+        <div class="field-label">類別</div>
+        <select id="bCat">
+          <option value="work">工作</option>
+          <option value="study">學習</option>
+          <option value="break">休息</option>
+          <option value="social">社交</option>
+          <option value="phone">手機/娛樂</option>
+          <option value="other">其他</option>
+        </select>
+      </div>
+      <div>
+        <div class="field-label">備註</div>
+        <input type="text" id="bNote" placeholder="選填…">
+      </div>
+    </div>
+    <div class="sheet-actions">
+      <button class="btn btn-primary" onclick="saveBlock()">儲存</button>
+      <button class="btn" style="color:var(--red);border-color:var(--red)" id="blockDelBtn" onclick="deleteBlock()">刪除</button>
+      <button class="btn" onclick="closeBlockSheet()">取消</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════ STATE & STORAGE ═══════════════
+const STORE_KEY = 'daylog_v2';
+let db = JSON.parse(localStorage.getItem(STORE_KEY) || '{"todos":[],"days":{}}');
+// db.todos = [{id, title, date, start, end, priority, tags[], note, done}]
+// db.days[dateKey] = { blocks: [{id,col,title,start,end,cat,note}], logs: [{id,time,cat,text}], note: '' }
+
+function saveDB() { localStorage.setItem(STORE_KEY, JSON.stringify(db)); }
+function dayData(key) {
+  if (!db.days[key]) db.days[key] = { blocks: [], logs: [], note: '' };
+  return db.days[key];
+}
+
+// ═══════════════ DATE & VIEW STATE ═══════════════
+let viewDate = new Date(); // currently viewed date
+let todayFilter = 'all';
+let editingTodoId = null;
+let editingBlockId = null;
+let blockCol = null; // 'plan' or 'actual'
+let dragStartY = null, dragStartHour = null, dragEndHour = null;
+let isDragging = false;
+let dragPreviewEl = null;
+
+function dateKey(d) {
+  const dd = d || viewDate;
+  return dd.toISOString().slice(0,10);
+}
+function todayKey() { return new Date().toISOString().slice(0,10); }
+function nowTime() {
+  const n = new Date();
+  return pad(n.getHours()) + ':' + pad(n.getMinutes());
+}
+function pad(n) { return String(n).padStart(2,'0'); }
+function formatDate(d) {
+  const days = ['日','一','二','三','四','五','六'];
+  return `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} 週${days[d.getDay()]}`;
+}
+function timeToMin(t) { const [h,m]=t.split(':'); return +h*60 + +m; }
+function minToTime(m) { return pad(Math.floor(m/60)) + ':' + pad(m%60); }
+
+// ═══════════════ CLOCK ═══════════════
+function updateClock() {
+  const n = new Date();
+  document.getElementById('clock').textContent = pad(n.getHours()) + ':' + pad(n.getMinutes());
+  document.getElementById('headerDate').textContent = formatDate(viewDate);
+  updateNowLine();
+}
+setInterval(updateClock, 15000);
+updateClock();
+
+// ═══════════════ TABS ═══════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById(tab + 'Page').classList.add('active');
+  document.getElementById('fab').style.display = tab === 'todo' ? 'flex' : 'none';
+  if (tab === 'timeline') renderTimeline();
+  if (tab === 'summary')  renderSummary();
+  if (tab === 'todo')     renderTodos();
+}
+
+// ═══════════════ VIEW DATE NAV ═══════════════
+function changeViewDate(delta) {
+  viewDate = new Date(viewDate);
+  viewDate.setDate(viewDate.getDate() + delta);
+  updateClock();
+  renderDateTabs();
+  renderTodos();
+  renderTimeline();
+  renderSummary();
+  loadNote();
+}
+function gotoToday() {
+  viewDate = new Date();
+  updateClock();
+  renderDateTabs();
+  renderTodos();
+  renderTimeline();
+  renderSummary();
+  loadNote();
+}
+
+// ═══════════════ DATE TABS ═══════════════
+function renderDateTabs() {
+  const wrap = document.getElementById('dateTabs');
+  const today = new Date();
+  const tabs = [];
+  for (let i = -3; i <= 7; i++) {
+    const d = new Date(today);
+    d.setDate(today.getDate() + i);
+    const key = d.toISOString().slice(0,10);
+    const isView = key === dateKey();
+    const dayNames = ['日','一','二','三','四','五','六'];
+    const label = i === 0 ? '今天' : (i === -1 ? '昨天' : (i === 1 ? '明天' : `${pad(d.getMonth()+1)}/${pad(d.getDate())} 週${dayNames[d.getDay()]}`));
+    tabs.push(`<div class="date-chip ${isView?'active':''}" onclick="jumpToDate('${key}')">${label}</div>`);
+  }
+  wrap.innerHTML = tabs.join('');
+  // scroll active into view
+  setTimeout(() => {
+    const active = wrap.querySelector('.active');
+    if (active) active.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+  }, 50);
+}
+function jumpToDate(key) {
+  viewDate = new Date(key + 'T00:00:00');
+  updateClock();
+  renderDateTabs();
+  renderTodos();
+  renderTimeline();
+  renderSummary();
+  loadNote();
+}
+
+// ═══════════════ TODO ═══════════════
+function setFilter(mode, btn) {
+  todayFilter = mode;
+  document.querySelectorAll('.filter-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  renderTodos();
+}
+function renderTodos() {
+  const wrap = document.getElementById('todoListWrap');
+  let todos = db.todos.filter(t => t.date === dateKey());
+  // also show todos with no date as general
+  // filter
+  if (todayFilter === 'undone') todos = todos.filter(t => !t.done);
+  if (todayFilter === 'high')   todos = todos.filter(t => t.priority === 'high');
+  // sort
+  todos.sort((a,b) => {
+    if (a.done !== b.done) return a.done ? 1 : -1;
+    const ap = {high:0,mid:1,low:2}[a.priority];
+    const bp = {high:0,mid:1,low:2}[b.priority];
+    if (ap !== bp) return ap - bp;
+    if (a.start && b.start) return a.start.localeCompare(b.start);
+    return 0;
+  });
+  if (!todos.length) {
+    wrap.innerHTML = `<div class="empty-msg">這天沒有代辦<br><span style="font-size:11px;opacity:0.6">點擊右下角 ＋ 新增</span></div>`;
+    return;
+  }
+  wrap.innerHTML = todos.map(t => {
+    const timeStr = t.start ? `⏱ ${t.start}${t.end?' → '+t.end:''}` : '';
+    const tagsHtml = (t.tags||[]).map(tag => `<span class="tag-chip">${esc(tag)}</span>`).join('');
+    return `<div class="todo-item p-${t.priority} ${t.done?'done':''}"
+         draggable="true"
+         ondragstart="tdragStart(event,'${t.id}')"
+         ondragover="event.preventDefault()"
+         ondrop="tdropOn(event,'${t.id}')">
+      <div class="todo-row1">
+        <div class="priority-dot"></div>
+        <div class="check-box ${t.done?'checked':''}" onclick="toggleTodo('${t.id}')"></div>
+        <span class="todo-title">${esc(t.title)}</span>
+      </div>
+      <div class="todo-row2">
+        ${timeStr ? `<span class="todo-time">${timeStr}</span>` : ''}
+        ${tagsHtml}
+      </div>
+      ${t.note ? `<div class="todo-note">${esc(t.note)}</div>` : ''}
+      <div class="todo-swipe-actions">
+        <button class="act-btn" onclick="openEditTodo('${t.id}')">✎</button>
+        <button class="act-btn del" onclick="deleteTodo('${t.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+let tdragSrc = null;
+function tdragStart(e, id) { tdragSrc = id; }
+function tdropOn(e, targetId) {
+  e.preventDefault();
+  if (tdragSrc === targetId) return;
+  const from = db.todos.findIndex(t => t.id == tdragSrc);
+  const to   = db.todos.findIndex(t => t.id == targetId);
+  const [m] = db.todos.splice(from, 1);
+  db.todos.splice(to, 0, m);
+  saveDB(); renderTodos();
+}
+
+function toggleTodo(id) {
+  const t = db.todos.find(t => t.id == id);
+  if (t) { t.done = !t.done; saveDB(); renderTodos(); renderSummary(); }
+}
+function deleteTodo(id) {
+  db.todos = db.todos.filter(t => t.id != id);
+  saveDB(); renderTodos(); renderSummary();
+}
+
+function openAddTodo() {
+  editingTodoId = null;
+  document.getElementById('sheetTitle').textContent = '新增代辦';
+  document.getElementById('fTitle').value = '';
+  document.getElementById('fDate').value = dateKey();
+  document.getElementById('fStart').value = '';
+  document.getElementById('fEnd').value = '';
+  document.getElementById('fPriority').value = 'mid';
+  document.getElementById('fTags').value = '';
+  document.getElementById('fNote').value = '';
+  document.getElementById('todoSheet').classList.add('show');
+  setTimeout(() => document.getElementById('fTitle').focus(), 100);
+}
+function openEditTodo(id) {
+  const t = db.todos.find(t => t.id == id);
+  if (!t) return;
+  editingTodoId = id;
+  document.getElementById('sheetTitle').textContent = '編輯代辦';
+  document.getElementById('fTitle').value = t.title;
+  document.getElementById('fDate').value = t.date || dateKey();
+  document.getElementById('fStart').value = t.start || '';
+  document.getElementById('fEnd').value = t.end || '';
+  document.getElementById('fPriority').value = t.priority;
+  document.getElementById('fTags').value = (t.tags||[]).join(', ');
+  document.getElementById('fNote').value = t.note || '';
+  document.getElementById('todoSheet').classList.add('show');
+}
+function saveTodo() {
+  const title = document.getElementById('fTitle').value.trim();
+  if (!title) { document.getElementById('fTitle').focus(); return; }
+  const data = {
+    title,
+    date:     document.getElementById('fDate').value || dateKey(),
+    start:    document.getElementById('fStart').value,
+    end:      document.getElementById('fEnd').value,
+    priority: document.getElementById('fPriority').value,
+    tags:     document.getElementById('fTags').value.split(',').map(s=>s.trim()).filter(Boolean),
+    note:     document.getElementById('fNote').value.trim(),
+  };
+  if (editingTodoId) {
+    const t = db.todos.find(t => t.id == editingTodoId);
+    Object.assign(t, data);
+  } else {
+    db.todos.push({ id: Date.now(), done: false, ...data });
+  }
+  saveDB(); renderTodos(); renderSummary();
+  closeTodoSheet();
+}
+function closeTodoSheet(e) {
+  if (e && e.target !== document.getElementById('todoSheet')) return;
+  document.getElementById('todoSheet').classList.remove('show');
+}
+
+// ═══════════════ TIMELINE ═══════════════
+const HOUR_H = 60; // px per hour
+const START_H = 6;
+const END_H = 24;
+const CAT_COLORS = { work:'#3a6b8a', study:'#b5651d', break:'#4a7c59', social:'#6a4a8a', phone:'#9b3a3a', other:'#a09076' };
+const CAT_LABELS = { work:'工作', study:'學習', break:'休息', social:'社交', phone:'手機', other:'其他' };
+
+function renderTimeline() {
+  const body = document.getElementById('timelineBody');
+  const data = dayData(dateKey());
+  const now = new Date();
+  const nowH = now.getHours() + now.getMinutes()/60;
+
+  let html = `<div style="position:relative">`;
+  // Hour rows
+  for (let h = START_H; h < END_H; h++) {
+    const isCurrent = h === Math.floor(nowH);
+    html += `<div class="hour-row" style="height:${HOUR_H}px">
+      <div class="hour-label ${isCurrent?'current':''}">${pad(h)}:00</div>
+      <div class="timeline-col plan-col"
+           id="plan-col-${h}"
+           onmousedown="colDragStart(event,'plan',${h})"
+           ontouchstart="colTouchStart(event,'plan',${h})"
+           onclick="colClick(event,'plan',${h})">
+      </div>
+      <div class="timeline-col actual-col"
+           id="actual-col-${h}"
+           onmousedown="colDragStart(event,'actual',${h})"
+           ontouchstart="colTouchStart(event,'actual',${h})"
+           onclick="colClick(event,'actual',${h})">
+      </div>
+    </div>`;
+  }
+
+  // Now indicator
+  if (nowH >= START_H && nowH < END_H && dateKey() === todayKey()) {
+    const top = (nowH - START_H) * HOUR_H;
+    html += `<div class="now-indicator" style="top:${top}px"></div>`;
+  }
+
+  html += `</div>`;
+  body.innerHTML = html;
+
+  // Render blocks
+  data.blocks.forEach(b => renderBlock(b));
+
+  // Quick log time default
+  document.getElementById('qTime').value = nowTime();
+}
+
+function renderBlock(b) {
+  const startMin = timeToMin(b.start);
+  const endMin   = timeToMin(b.end);
+  const top    = (startMin - START_H*60) / 60 * HOUR_H;
+  const height = Math.max((endMin - startMin) / 60 * HOUR_H, 18);
+  const colPrefix = b.col + '-col-';
+  const startH = Math.floor(timeToMin(b.start)/60);
+
+  // Find the column div for startH
+  const col = document.getElementById(b.col + '-col-' + startH);
+  if (!col) return;
+
+  // Position relative to the full timeline
+  const parentRect = col.closest('.timeline-col');
+  const blockEl = document.createElement('div');
+  blockEl.className = `time-block ${b.col==='plan'?'plan-block':'actual-block'} cat-${b.cat}`;
+  blockEl.style.top = `${top - (startH - START_H)*HOUR_H}px`;
+  blockEl.style.height = `${height}px`;
+  blockEl.innerHTML = `<div class="block-title">${esc(b.title)}</div><div class="block-time">${b.start}–${b.end}</div>`;
+  blockEl.onclick = (e) => { e.stopPropagation(); openBlockEdit(b.id); };
+
+  // Append to first column of this type (use absolute positioning relative to the whole grid)
+  const firstCol = document.querySelector(`.${b.col}-col`);
+  if (firstCol) {
+    // Use position relative to the whole body container
+    const bodyEl = document.getElementById('timelineBody');
+    const absBlock = document.createElement('div');
+    absBlock.className = `time-block ${b.col==='plan'?'plan-block':'actual-block'} cat-${b.cat}`;
+    absBlock.style.position = 'absolute';
+    absBlock.style.top = `${top}px`;
+    absBlock.style.height = `${height}px`;
+    absBlock.style.zIndex = '10';
+    absBlock.innerHTML = blockEl.innerHTML;
+    absBlock.onclick = (e) => { e.stopPropagation(); openBlockEdit(b.id); };
+
+    // Position in the right column
+    const colEl = document.querySelector(`.${b.col}-col`);
+    if (colEl) {
+      colEl.style.position = 'relative';
+      const relBlock = document.createElement('div');
+      relBlock.className = `time-block ${b.col==='plan'?'plan-block':'actual-block'} cat-${b.cat}`;
+      relBlock.style.top    = `${top}px`;
+      relBlock.style.height = `${height}px`;
+      relBlock.style.left   = '2px';
+      relBlock.style.right  = '2px';
+      relBlock.style.position = 'absolute';
+      relBlock.innerHTML    = blockEl.innerHTML;
+      relBlock.onclick = (e) => { e.stopPropagation(); openBlockEdit(b.id); };
+    }
+  }
+
+  // Simplest: append absolute to first matching col in each hour row
+  placeBlock(b, top, height);
+}
+
+function placeBlock(b, top, height) {
+  // Place block across all hour rows (since it may span multiple)
+  // We use a single absolutely-positioned overlay container
+  let overlay = document.getElementById('blocks-overlay-' + b.col);
+  if (!overlay) {
+    const bodyEl = document.getElementById('timelineBody');
+    const container = bodyEl.querySelector('div');
+    overlay = document.createElement('div');
+    overlay.id = 'blocks-overlay-' + b.col;
+    overlay.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;';
+    container.appendChild(overlay);
+
+    // Get column positions
+    const planCols  = document.querySelectorAll('.plan-col');
+    const actualCols= document.querySelectorAll('.actual-col');
+    if (planCols.length)   overlay.dataset.left  = planCols[0].offsetLeft   + 'px';
+    if (actualCols.length) overlay.dataset.right = actualCols[0].offsetLeft + 'px';
+  }
+
+  const el = document.createElement('div');
+  el.className = `time-block ${b.col==='plan'?'plan-block':'actual-block'} cat-${b.cat}`;
+  el.style.position = 'absolute';
+  el.style.top    = top + 'px';
+  el.style.height = Math.max(height,20) + 'px';
+  el.style.pointerEvents = 'all';
+  el.dataset.blockId = b.id;
+  el.innerHTML = `<div class="block-title">${esc(b.title)}</div><div class="block-time">${b.start}–${b.end}</div>`;
+  el.onclick = (ev) => { ev.stopPropagation(); openBlockEdit(b.id); };
+  overlay.appendChild(el);
+}
+
+// ── Drag to create block ──
+let dragCol = null, dragStartPx = null, dragCurPx = null;
+let dragPreview = null;
+let dragHourRow = null;
+let globalDragCol = null, globalDragStart = null;
+
+function colDragStart(e, col, h) {
+  if (e.button !== 0) return;
+  globalDragCol = col;
+  globalDragStart = e;
+  const colEl = e.currentTarget;
+  const rect = colEl.getBoundingClientRect();
+  const offsetY = e.clientY - rect.top + (h - START_H) * HOUR_H;
+  dragStartPx = offsetY;
+  dragCurPx   = offsetY;
+  blockCol    = col;
+
+  document.addEventListener('mousemove', onDragMove);
+  document.addEventListener('mouseup', onDragEnd);
+}
+
+function colTouchStart(e, col, h) {
+  const touch = e.touches[0];
+  const colEl = e.currentTarget;
+  const rect = colEl.getBoundingClientRect();
+  const offsetY = touch.clientY - rect.top + (h - START_H) * HOUR_H;
+  dragStartPx = offsetY;
+  dragCurPx   = offsetY;
+  blockCol    = col;
+
+  document.addEventListener('touchmove', onTouchMove, { passive: false });
+  document.addEventListener('touchend', onTouchEnd);
+}
+
+function onDragMove(e) {
+  const bodyEl = document.getElementById('timelineBody');
+  const rect = bodyEl.getBoundingClientRect();
+  dragCurPx = e.clientY - rect.top;
+  updateDragPreview();
+}
+function onTouchMove(e) {
+  e.preventDefault();
+  const bodyEl = document.getElementById('timelineBody');
+  const rect = bodyEl.getBoundingClientRect();
+  dragCurPx = e.touches[0].clientY - rect.top;
+  updateDragPreview();
+}
+
+function updateDragPreview() {
+  if (dragStartPx === null) return;
+  const minPx = Math.min(dragStartPx, dragCurPx);
+  const maxPx = Math.max(dragStartPx, dragCurPx);
+  if (maxPx - minPx < 8) return;
+
+  if (!dragPreview) {
+    dragPreview = document.createElement('div');
+    dragPreview.style.cssText = `position:absolute;left:2px;right:2px;background:var(--accent-l);border:2px dashed var(--accent);border-radius:6px;pointer-events:none;z-index:20;`;
+    const overlay = document.getElementById('blocks-overlay-' + blockCol);
+    if (overlay) overlay.appendChild(dragPreview);
+  }
+  // Position in the right column overlay
+  let overlayEl = document.getElementById('blocks-overlay-' + blockCol);
+  if (!overlayEl) return;
+
+  const colEls = document.querySelectorAll(`.${blockCol}-col`);
+  if (!colEls.length) return;
+  const bodyEl = document.getElementById('timelineBody');
+  const bodyRect = bodyEl.getBoundingClientRect();
+  const colRect = colEls[0].getBoundingClientRect();
+  const colLeft = colRect.left - bodyRect.left;
+  const colWidth = colRect.width;
+
+  dragPreview.style.top    = minPx + 'px';
+  dragPreview.style.height = (maxPx - minPx) + 'px';
+  dragPreview.style.left   = colLeft + 2 + 'px';
+  dragPreview.style.width  = colWidth - 4 + 'px';
+  dragPreview.style.position = 'absolute';
+
+  const startMin = Math.round((minPx / HOUR_H * 60 + START_H*60) / 15) * 15;
+  const endMin   = Math.round((maxPx / HOUR_H * 60 + START_H*60) / 15) * 15;
+  dragPreview.textContent = `${minToTime(startMin)} – ${minToTime(endMin)}`;
+  dragPreview.style.fontSize = '10px';
+  dragPreview.style.padding  = '4px 6px';
+  dragPreview.style.color    = 'var(--accent)';
+  dragPreview.style.fontFamily = 'var(--mono)';
+}
+
+function onDragEnd(e) {
+  document.removeEventListener('mousemove', onDragMove);
+  document.removeEventListener('mouseup', onDragEnd);
+  finishDrag();
+}
+function onTouchEnd(e) {
+  document.removeEventListener('touchmove', onTouchMove);
+  document.removeEventListener('touchend', onTouchEnd);
+  finishDrag();
+}
+function finishDrag() {
+  if (dragPreview) { dragPreview.remove(); dragPreview = null; }
+  if (dragStartPx === null || dragCurPx === null) { dragStartPx = null; return; }
+
+  const minPx = Math.min(dragStartPx, dragCurPx);
+  const maxPx = Math.max(dragStartPx, dragCurPx);
+  if (maxPx - minPx < 12) { dragStartPx = null; return; }
+
+  const startMin = Math.round((minPx / HOUR_H * 60 + START_H*60) / 15) * 15;
+  const endMin   = Math.round((maxPx / HOUR_H * 60 + START_H*60) / 15) * 15;
+
+  dragStartPx = null; dragCurPx = null;
+  openBlockCreate(blockCol, minToTime(Math.max(startMin, START_H*60)), minToTime(Math.min(endMin, END_H*60)));
+}
+
+function colClick(e, col, h) {
+  // Only fire if not a drag
+  if (Math.abs(dragCurPx - dragStartPx) > 10) return;
+  blockCol = col;
+  const colEl = e.currentTarget;
+  const rect = colEl.getBoundingClientRect();
+  const offsetY = e.clientY - rect.top;
+  const totalMin = Math.round(((h - START_H) * HOUR_H + offsetY) / HOUR_H * 60 / 15) * 15 + START_H*60;
+  openBlockCreate(col, minToTime(totalMin), minToTime(totalMin + 60));
+}
+
+function openBlockCreate(col, startT, endT) {
+  editingBlockId = null;
+  document.getElementById('blockSheetTitle').textContent = (col==='plan'?'📋 新增計畫':'✅ 新增實際執行');
+  document.getElementById('bTitle').value = '';
+  document.getElementById('bStart').value = startT || '';
+  document.getElementById('bEnd').value   = endT   || '';
+  document.getElementById('bCat').value   = col === 'plan' ? 'work' : 'work';
+  document.getElementById('bNote').value  = '';
+  document.getElementById('blockDelBtn').style.display = 'none';
+  document.getElementById('blockSheet').classList.add('show');
+  setTimeout(() => document.getElementById('bTitle').focus(), 100);
+}
+function openBlockEdit(id) {
+  const data = dayData(dateKey());
+  const b = data.blocks.find(b => b.id == id);
+  if (!b) return;
+  editingBlockId = id;
+  blockCol = b.col;
+  document.getElementById('blockSheetTitle').textContent = '編輯區塊';
+  document.getElementById('bTitle').value = b.title;
+  document.getElementById('bStart').value = b.start;
+  document.getElementById('bEnd').value   = b.end;
+  document.getElementById('bCat').value   = b.cat;
+  document.getElementById('bNote').value  = b.note || '';
+  document.getElementById('blockDelBtn').style.display = '';
+  document.getElementById('blockSheet').classList.add('show');
+}
+function saveBlock() {
+  const title = document.getElementById('bTitle').value.trim();
+  if (!title) { document.getElementById('bTitle').focus(); return; }
+  const data = dayData(dateKey());
+  const block = {
+    title,
+    start: document.getElementById('bStart').value || '08:00',
+    end:   document.getElementById('bEnd').value   || '09:00',
+    cat:   document.getElementById('bCat').value,
+    note:  document.getElementById('bNote').value.trim(),
+    col:   blockCol,
+  };
+  if (editingBlockId) {
+    const b = data.blocks.find(b => b.id == editingBlockId);
+    Object.assign(b, block);
+  } else {
+    data.blocks.push({ id: Date.now(), ...block });
+  }
+  saveDB(); renderTimeline(); closeBlockSheet(); renderSummary();
+}
+function deleteBlock() {
+  const data = dayData(dateKey());
+  data.blocks = data.blocks.filter(b => b.id != editingBlockId);
+  saveDB(); renderTimeline(); closeBlockSheet(); renderSummary();
+}
+function closeBlockSheet(e) {
+  if (e && e.target !== document.getElementById('blockSheet')) return;
+  document.getElementById('blockSheet').classList.remove('show');
+  editingBlockId = null;
+}
+
+// ── Re-render blocks after DOM updates ──
+// Override renderTimeline to properly place blocks with absolute overlay
+const _origRenderTimeline = renderTimeline;
+// We'll use a fixed layout approach instead
+
+function renderTimeline() {
+  const body = document.getElementById('timelineBody');
+  const data = dayData(dateKey());
+  const now  = new Date();
+  const nowH = now.getHours() + now.getMinutes()/60;
+
+  // Build grid
+  let rows = '';
+  for (let h = START_H; h < END_H; h++) {
+    const isCur = h === Math.floor(nowH) && dateKey() === todayKey();
+    rows += `<div class="hour-row" style="height:${HOUR_H}px">
+      <div class="hour-label${isCur?' current':''}">${pad(h)}:00</div>
+      <div class="timeline-col plan-col" data-h="${h}" data-col="plan"
+           onmousedown="startDrag(event,'plan')"
+           ontouchstart="startTouchDrag(event,'plan')"></div>
+      <div class="timeline-col actual-col" data-h="${h}" data-col="actual"
+           onmousedown="startDrag(event,'actual')"
+           ontouchstart="startTouchDrag(event,'actual')"></div>
+    </div>`;
+  }
+
+  body.innerHTML = `<div style="position:relative">${rows}</div>`;
+
+  // Now indicator
+  if (nowH >= START_H && nowH < END_H && dateKey() === todayKey()) {
+    const topPx = (nowH - START_H) * HOUR_H;
+    const ni = document.createElement('div');
+    ni.className = 'now-indicator';
+    ni.style.top = topPx + 'px';
+    body.querySelector('div').appendChild(ni);
+  }
+
+  // Place blocks using getBoundingClientRect after layout
+  requestAnimationFrame(() => placeAllBlocks(data.blocks));
+
+  // Quick log time
+  document.getElementById('qTime').value = nowTime();
+}
+
+function placeAllBlocks(blocks) {
+  const body = document.getElementById('timelineBody');
+  if (!body) return;
+  const planCols   = body.querySelectorAll('.plan-col');
+  const actualCols = body.querySelectorAll('.actual-col');
+  if (!planCols.length) return;
+
+  const bodyRect  = body.getBoundingClientRect();
+  const planRect  = planCols[0].getBoundingClientRect();
+  const actualRect= actualCols[0].getBoundingClientRect();
+
+  // Remove old overlays
+  body.querySelectorAll('.blocks-overlay').forEach(el => el.remove());
+  const overlay = document.createElement('div');
+  overlay.className = 'blocks-overlay';
+  overlay.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;';
+  body.querySelector('div').appendChild(overlay);
+
+  blocks.forEach(b => {
+    const startTotalMin = timeToMin(b.start);
+    const endTotalMin   = timeToMin(b.end);
+    const topPx    = (startTotalMin - START_H * 60) / 60 * HOUR_H;
+    const heightPx = Math.max((endTotalMin - startTotalMin) / 60 * HOUR_H, 20);
+
+    const colRect = b.col === 'plan' ? planRect : actualRect;
+    const leftPx  = colRect.left - bodyRect.left + 3;
+    const widthPx = colRect.width - 6;
+
+    const el = document.createElement('div');
+    el.className = `time-block ${b.col==='plan'?'plan-block':'actual-block'} cat-${b.cat}`;
+    el.style.cssText = `position:absolute;top:${topPx}px;left:${leftPx}px;width:${widthPx}px;height:${heightPx}px;pointer-events:all;`;
+    el.innerHTML = `<div class="block-title">${esc(b.title)}</div><div class="block-time">${b.start}–${b.end}</div>`;
+    el.onclick = (ev) => { ev.stopPropagation(); openBlockEdit(b.id); };
+    overlay.appendChild(el);
+  });
+}
+
+// ── Drag to create ──
+let _dragCol = null, _dragStartY = null, _dragPreview = null, _bodyRect = null;
+let _planLeft = 0, _planWidth = 0, _actualLeft = 0, _actualWidth = 0;
+
+function getDragGeometry() {
+  const body = document.getElementById('timelineBody');
+  _bodyRect   = body.getBoundingClientRect();
+  const planR = body.querySelector('.plan-col').getBoundingClientRect();
+  const actR  = body.querySelector('.actual-col').getBoundingClientRect();
+  _planLeft   = planR.left   - _bodyRect.left;
+  _planWidth  = planR.width;
+  _actualLeft = actR.left    - _bodyRect.left;
+  _actualWidth= actR.width;
+}
+
+function startDrag(e, col) {
+  if (e.button !== 0) return;
+  getDragGeometry();
+  _dragCol    = col;
+  _dragStartY = e.clientY - _bodyRect.top;
+  document.addEventListener('mousemove', onGlobalMouseMove);
+  document.addEventListener('mouseup',   onGlobalMouseUp);
+  e.preventDefault();
+}
+function startTouchDrag(e, col) {
+  getDragGeometry();
+  _dragCol    = col;
+  _dragStartY = e.touches[0].clientY - _bodyRect.top;
+  document.addEventListener('touchmove', onGlobalTouchMove, { passive:false });
+  document.addEventListener('touchend',  onGlobalTouchEnd);
+}
+
+function onGlobalMouseMove(e) {
+  const curY = e.clientY - _bodyRect.top;
+  drawDragPreview(curY);
+}
+function onGlobalTouchMove(e) {
+  e.preventDefault();
+  const curY = e.touches[0].clientY - _bodyRect.top;
+  drawDragPreview(curY);
+}
+
+function drawDragPreview(curY) {
+  if (_dragStartY === null) return;
+  const minY = Math.min(_dragStartY, curY);
+  const maxY = Math.max(_dragStartY, curY);
+  if (maxY - minY < 8) return;
+
+  const body = document.getElementById('timelineBody');
+  let overlay = body.querySelector('.blocks-overlay');
+  if (!overlay) return;
+
+  if (!_dragPreview) {
+    _dragPreview = document.createElement('div');
+    _dragPreview.style.cssText = 'position:absolute;background:rgba(181,101,29,0.12);border:2px dashed var(--accent);border-radius:6px;pointer-events:none;z-index:25;font-size:10px;padding:4px 6px;color:var(--accent);font-family:var(--mono);';
+    overlay.appendChild(_dragPreview);
+  }
+
+  const left  = _dragCol === 'plan' ? _planLeft   : _actualLeft;
+  const width = _dragCol === 'plan' ? _planWidth  : _actualWidth;
+  _dragPreview.style.top    = minY + 'px';
+  _dragPreview.style.left   = (left + 2) + 'px';
+  _dragPreview.style.width  = (width - 4) + 'px';
+  _dragPreview.style.height = (maxY - minY) + 'px';
+
+  const sm = Math.round((minY / HOUR_H * 60 + START_H*60) / 15) * 15;
+  const em = Math.round((maxY / HOUR_H * 60 + START_H*60) / 15) * 15;
+  _dragPreview.textContent = `${minToTime(Math.max(sm,START_H*60))} – ${minToTime(Math.min(em,END_H*60))}`;
+}
+
+function onGlobalMouseUp(e) {
+  document.removeEventListener('mousemove', onGlobalMouseMove);
+  document.removeEventListener('mouseup',   onGlobalMouseUp);
+  finalizeDrag(e.clientY - _bodyRect.top);
+}
+function onGlobalTouchEnd(e) {
+  document.removeEventListener('touchmove', onGlobalTouchMove);
+  document.removeEventListener('touchend',  onGlobalTouchEnd);
+  finalizeDrag(e.changedTouches[0].clientY - _bodyRect.top);
+}
+
+function finalizeDrag(curY) {
+  if (_dragPreview) { _dragPreview.remove(); _dragPreview = null; }
+  if (_dragStartY === null) return;
+  const minY = Math.min(_dragStartY, curY);
+  const maxY = Math.max(_dragStartY, curY);
+  const col  = _dragCol;
+  _dragStartY = null; _dragCol = null;
+
+  if (maxY - minY < 12) return; // tap, not drag
+
+  const sm = Math.round((minY / HOUR_H * 60 + START_H*60) / 15) * 15;
+  const em = Math.round((maxY / HOUR_H * 60 + START_H*60) / 15) * 15;
+  openBlockCreate(col, minToTime(Math.max(sm, START_H*60)), minToTime(Math.min(em, END_H*60)));
+}
+
+function updateNowLine() {
+  const ni = document.querySelector('.now-indicator');
+  if (!ni || dateKey() !== todayKey()) return;
+  const now = new Date();
+  const nowH = now.getHours() + now.getMinutes()/60;
+  ni.style.top = (nowH - START_H) * HOUR_H + 'px';
+}
+
+// ── Quick Log ──
+function quickLog() {
+  const text = document.getElementById('qText').value.trim();
+  if (!text) return;
+  const data = dayData(dateKey());
+  const time = document.getElementById('qTime').value || nowTime();
+  const cat  = document.getElementById('qCat').value;
+  // Add as actual block (30 min default)
+  const startMin = timeToMin(time);
+  const block = {
+    id: Date.now(), col: 'actual', title: text,
+    start: time, end: minToTime(startMin + 30),
+    cat, note: ''
+  };
+  data.blocks.push(block);
+  saveDB(); renderTimeline(); renderSummary();
+  document.getElementById('qText').value = '';
+  document.getElementById('qTime').value = minToTime(startMin + 30);
+}
+
+// ═══════════════ SUMMARY ═══════════════
+function renderSummary() {
+  const data = dayData(dateKey());
+  const todos = db.todos.filter(t => t.date === dateKey());
+  const done  = todos.filter(t => t.done).length;
+  const actual = data.blocks.filter(b => b.col === 'actual');
+
+  document.getElementById('st1').textContent = todos.length;
+  document.getElementById('st2').textContent = done;
+  document.getElementById('st3').textContent = actual.length;
+
+  // Total logged hours
+  let totalMin = 0;
+  actual.forEach(b => { totalMin += Math.max(timeToMin(b.end) - timeToMin(b.start), 0); });
+  document.getElementById('st4').textContent = (totalMin/60).toFixed(1) + 'h';
+
+  // Category bars
+  const catMin = {};
+  actual.forEach(b => {
+    const m = Math.max(timeToMin(b.end) - timeToMin(b.start), 0);
+    catMin[b.cat] = (catMin[b.cat]||0) + m;
+  });
+  const chart = document.getElementById('catChart');
+  const catOrder = ['work','study','break','social','phone','other'];
+  const hasData  = actual.length > 0;
+  if (!hasData) { chart.innerHTML = '<div class="empty-msg">尚無實際執行紀錄</div>'; }
+  else {
+    chart.innerHTML = catOrder.filter(c => catMin[c]).map(c => {
+      const pct = Math.round(catMin[c] / totalMin * 100);
+      return `<div class="cat-row">
+        <div class="cat-dot" style="background:${CAT_COLORS[c]}"></div>
+        <span class="cat-name" style="color:${CAT_COLORS[c]};font-size:11px">${CAT_LABELS[c]}</span>
+        <div class="cat-track"><div class="cat-fill" style="width:${pct}%;background:${CAT_COLORS[c]}"></div></div>
+        <span class="cat-pct">${pct}%</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Plan vs actual
+  const pvaEl = document.getElementById('pvaChart');
+  const planBlocks = data.blocks.filter(b => b.col === 'plan');
+  if (!planBlocks.length) { pvaEl.innerHTML = '<div class="empty-msg">在時間軸左欄新增計畫後顯示</div>'; }
+  else {
+    pvaEl.innerHTML = planBlocks.map(p => {
+      const matched = actual.some(a =>
+        a.title.includes(p.title.slice(0,3)) ||
+        (timeToMin(a.start) < timeToMin(p.end) && timeToMin(a.end) > timeToMin(p.start))
+      );
+      const todoDone = todos.some(t => t.done && t.title.includes(p.title.slice(0,3)));
+      let cls, label;
+      if (todoDone || matched) { cls = 'pva-done'; label = '完成'; }
+      else { cls = 'pva-miss'; label = '未執行'; }
+      return `<div class="pva-item">
+        <span class="pva-name">${esc(p.title)} <span style="font-family:var(--mono);font-size:10px;color:var(--text3)">${p.start}–${p.end}</span></span>
+        <span class="pva-badge ${cls}">${label}</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+function loadNote() {
+  const data = dayData(dateKey());
+  document.getElementById('dailyNote').value = data.note || '';
+}
+function saveNote() {
+  const data = dayData(dateKey());
+  data.note = document.getElementById('dailyNote').value;
+  saveDB();
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'daylog_' + new Date().toISOString().slice(0,10) + '.json'; a.click();
+}
+
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════ INIT ═══════════════
+renderDateTabs();
+renderTodos();
+loadNote();
+renderSummary();
+</script>
+</body>
+</html>
